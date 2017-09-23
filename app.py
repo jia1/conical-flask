@@ -210,11 +210,15 @@ def plan():
                 curr_count += curr_stn.get_passengers()
                 prev_stn = curr_stn
                 curr_stn = curr_stn.get_pointer()
-            if prev_stn in list_max:
-                curr_count += list_max[prev_stn]
-                list_max[prev_stn] = curr_count
-            if curr_count > curr_max:
-                curr_max = curr_count
-                curr_max_via = prev_stn.get_name()
+            if prev_stn != None:
+                prev_stn_name = prev_stn.get_name()
+                if prev_stn_name in list_max:
+                    #curr_count += list_max[prev_stn_name]
+                    pass
+                if curr_count > curr_max:
+                    curr_max = curr_count
+                    curr_max_via = prev_stn_name
+                    list_max[curr_max_via] = curr_max
+                list_max[prev_stn_name] = curr_count
 
-        return jsonify({"line":prev_stn.get_line(),"totalNumOfPassengers":curr_max,"reachingVia":curr_max_via})
+        return jsonify({"line":nodes[curr_max_via].get_line(),"totalNumOfPassengers":curr_max,"reachingVia":curr_max_via})
