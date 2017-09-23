@@ -22,7 +22,7 @@ def sorting():
                 pivot = inlist[0]
                 lesser = qsort([x for x in inlist[1:] if x < pivot])
                 greater = qsort([x for x in inlist[1:] if x >= pivot])
-            return lesser + [pivot] + greater
+                return lesser + [pivot] + greater
         return str(data)
     return 'NAK'
 
