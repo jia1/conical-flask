@@ -102,20 +102,22 @@ def compress(mode):
             compressed = ''.join(compressed)
             answer = len(compressed) * 8
         elif mode == 'LZW':
-            codes = []
-            lzw_dict = {}
-            next_code = 256
             p = data[0]
+            lzw_dict = {p: ord(p)}
+            next_code = 256
             for i in range(1, len(data)):
-                p_concat = p + data[i]
-                if (len(p_concat) == 1 and 0 <= ord(p_concat) <= 255) or p_concat in lzw_dict:
+                c = data[i]
+                p_concat = p + c
+                if (p_concat in lzw_dict):
                     p = p_concat
+                elif (len(p_concat) == 1 and 0 <= ord(p_concat) <= 255):
+                    lzw_dict[p_concat] = ord(p_concat)
                 else:
                     lzw_dict[p_concat] = next_code
                     next_code += 1
-                    codes.append(p)
-                    p = data[i]
-            answer = len(codes) * 12
+                    p = c
+            return str(lzw_dict)
+            answer = len(lzw_dict) * 12
         elif mode == 'WDE':
             data = data.strip()
             num_spaces = 0
