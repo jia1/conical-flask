@@ -47,3 +47,12 @@ def heist():
                 dollarValue = dollarValue + weight*reqRatio
                 count2 = count2 - 1
                 return jsonify({"heist": dollarValue})
+
+@app.route('/stringcompression/<mode>', methods = ['POST'])
+def compress(mode):
+    if request.headers['Content-Type'] == 'application/json':
+        pass
+    res = flask.Response('')
+    res.headers['Content-Type'] = 'text/plain'
+    return res
+
