@@ -313,13 +313,6 @@ def empty():
         containerWidth = container[1]
         containerHeight = container[2]
         #outerContainerWidth = containerWidth + containerXCoord
-        #test cases:
-        containerCoord = [0,0]
-        childCoord = [5,2]
-        childWidth = 4
-        childHeight = 4
-        containerWidth = 10
-        containerHeight = 8
         if (childShape == "rectangle") or (childShape=="square"):
             childWidth = child[2]
         if childShape=="rectangle":
