@@ -147,6 +147,7 @@ def compress(mode):
 @app.route('/horse-racing', methods = ['POST'])
 def race():
     if request.headers['Content-Type'] == 'application/json':
+        print('/horse-racing')
         data = request.data
         c_horse = Counter([])
         c_jockey = Counter([])
