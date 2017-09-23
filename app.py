@@ -8,8 +8,8 @@ def index():
 @app.route('/sort', methods = ['POST'])
 def sorting():
     if request.headers['Content-Type'] == 'application/json':
-        data = request.data
+        data = eval(request.data)
         data.sort()
-        return data
+        return str(data)
     return 'NAK'
 
