@@ -119,37 +119,24 @@ def compress(mode):
                     p = c
             answer = len(lzw_dict) * 12
         elif mode == 'WDE':
-            data = data.strip()
-            num_spaces = 0
-            num_non_alphanum = 0
-            prev = ''
+            data = data.strip().split(' ')
             p = data[0]
-            lzw_dict = {p: ord(p)}
-            next_code = 256
+            lzw_dict = {p: 0}
+            next_code = 1
             for i in range(1, len(data)):
                 c = data[i]
-                if c == ' ':
-                    num_non_alphanum += 1
-                    if prev != ' ':
-                        num_spaces += 1
-                elif not c.isalnum():
-                    num_non_alphanum += 1
+                if c in lzw_dict:
+                    pass
                 else:
-                    p_concat = p + c
-                    if p_concat in lzw_dict:
-                        p = p_concat
-                    if len(p_concat) == 1 and 0 <= ord(p_concat) <= 255:
-                        lzw_dict[p_concat] = ord(p_concat)
-                        p = p_concat
-                    else:
-                        lzw_dict[p_concat] = next_code
-                        next_code += 1
-                    prev = c
+                    lzw_dict[c] = next_code
+                    next_code += 1
             if len(data) == 0:
                 answer = 0
             else:
-                answer = (1 + num_spaces + num_non_alphanum) * 12 + len(lzw_dict)
-                #answer = [num_spaces, num_non_alphanum, lzw_dict]
+                total_char = 0
+                for w in lzw_dict:
+                    total_char += len(w)
+                answer = (len(data) * 2 - 1) * 12 + total_char * 8
         else:
             pass
     res = Response(str(answer))
