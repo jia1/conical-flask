@@ -11,7 +11,15 @@ def index():
 def sorting():
     if request.headers['Content-Type'] == 'application/json':
         data = eval(request.data)
-        data.sort()
+        #data.sort()
+        def qsort(inlist):
+            if inlist == []:
+                return []
+            else:
+                pivot = inlist[0]
+                lesser = qsort([x for x in inlist[1:] if x < pivot])
+                greater = qsort([x for x in inlist[1:] if x >= pivot])
+            return lesser + [pivot] + greater
         return str(data)
     return 'NAK'
 
