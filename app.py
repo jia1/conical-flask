@@ -199,6 +199,7 @@ def plan():
                         to_explore.append(neighbour_name)
                 explored.add(src)
 
+        counted = {}
         curr_max = 0
         curr_max_via = ''
         list_max = {}
@@ -207,14 +208,16 @@ def plan():
             prev_stn = None
             curr_stn = nodes[stn_name]
             while curr_stn.get_name() != dest:
-                curr_count += curr_stn.get_passengers()
+                if curr_stn.get_name() not in counted:
+                    curr_count += curr_stn.get_passengers()
+                    counted[curr_stn.get_name()] = True
                 prev_stn = curr_stn
                 curr_stn = curr_stn.get_pointer()
+
             if prev_stn != None:
                 prev_stn_name = prev_stn.get_name()
                 if prev_stn_name in list_max:
-                    #curr_count += list_max[prev_stn_name]
-                    pass
+                    curr_count += list_max[prev_stn_name]
                 if curr_count > curr_max:
                     curr_max = curr_count
                     curr_max_via = prev_stn_name
