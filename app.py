@@ -19,30 +19,31 @@ def heist():
         data = request.json
         maxWeight = data['maxWeight']
         vault = data['vault']
-        listweights, listvalues = [], []
+        listWeights, listValues = [], []
         for item in vault:
-            listweights.append(item['weight'])
-            listvalues.append(item['value'])
+            listWeights.append(item['weight'])
+            listValues.append(item['value'])
+        #return jsonify({'m': maxWeight, 'w': listWeights, 'v': listValues})
         count = 0
-        listratios = []
-        for i in listweights:
-            listratios.append(listvalues[count]/i)
+        listRatios = []
+        for i in listWeights:
+            listRatios.append(listValues[count]/i)
             count  = count + 1
-            sortedindices = [i[0] for i in sorted(enumerate(listratios), key=lambda x:x[1])];
-            listratios.sort();
-            listweights = [ listweights[i] for i in sortedindices]
-            weight = 0;
-            totalweight = 0;
-            count2= len(listratios)-1;
-            dollarvalue = 0;
-            while totalweight <= maxWeight:
-                reqratio = listratios[count2]
-                weight = listweights[count2]
-                prevtotal = totalweight
-                totalweight = totalweight + weight
-                if maxWeight < totalweight:
-                    dollarvalue = dollarvalue + (maxWeight - prevtotal)*reqratio;
+            sortedIndices = [i[0] for i in sorted(enumerate(listRatios), key=lambda x:x[1])]
+            listRatios.sort()
+            listWeights = [ listWeights[i] for i in sortedIndices]
+            weight = 0
+            totalWeight = 0
+            count2= len(listRatios)-1
+            dollarValue = 0
+            while totalWeight <= maxWeight:
+                reqRatio = listRatios[count2]
+                weight = listWeights[count2]
+                prevTotal = totalWeight
+                totalWeight = totalWeight + weight
+                if maxWeight < totalWeight:
+                    dollarValue = dollarValue + (maxWeight - prevTotal)*reqRatio
                     break
-                dollarvalue = dollarvalue + weight*reqratio;
-                count2 = count2 - 1;
-                return jsonify({"heist": dollarvalue});
+                dollarValue = dollarValue + weight*reqRatio
+                count2 = count2 - 1
+                return jsonify({"heist": dollarValue})
