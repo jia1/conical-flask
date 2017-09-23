@@ -1,6 +1,9 @@
+from collections import Counter
 from copy import deepcopy
 from dateutil.parser import parse
 from flask import Flask, jsonify, request, Response
+import json
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -151,6 +154,42 @@ def compress(mode):
     res = Response(str(answer))
     res.headers['Content-Type'] = 'text/plain'
     return res
+
+@app.route('/horse-racing', methods = ['POST'])
+def race():
+    if request.headers['Content-Type'] == 'application/json':
+        data = request.data
+        c_horse = Counter([])
+        c_jockey = Counter([])
+        c_trainer = Counter([])
+        combination = Counter([])
+        for x in data:
+            placing = int(x['Placing'])
+            if placing < 4:
+                #q1
+                if placing == 1:
+                    horse = x['Horse']
+                    jockey = x['jockeycode']
+                    trainer= x['Trainer']
+                    c_horse.update([horse])
+                    c_jockey.update([jockey])
+                    c_trainer.update([trainer])
+                #q2
+                score = 0
+                c_name = x['Horse'] + '-' + x['jockeycode'] + '-' + x['Trainer']
+                if placing == 1:
+                    score = 7
+                elif placing == 2:
+                    score = 3
+                else:
+                    score = 1
+                combination.update({c_name:score})
+            #q3
+
+        q1 = {"horse":max(c_horse),"jockey":max(c_jockey),"trainer":max(c_trainer)}
+        best_combi = max(combination).split('-')
+        q2 = {"horse":best_combi[0],"jockey":best_combi[1],"trainer":best_combi[2]}
+        return jsonify({"q1":q1,"q2":q2,"q3":""})
 
 @app.route('/trainPlanner', methods = ['POST'])
 def plan():
