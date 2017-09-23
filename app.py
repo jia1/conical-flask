@@ -1,3 +1,4 @@
+from dateutil.parser import parse
 from flask import Flask, jsonify, request, Response
 app = Flask(__name__)
 
@@ -47,6 +48,37 @@ def heist():
                 dollarValue = dollarValue + weight*reqRatio
                 count2 = count2 - 1
                 return jsonify({"heist": dollarValue})
+
+@app.route('/releaseSchedule', methods = ['POST'])
+def release():
+    if request.headers['Content-Type'] == 'application/json':
+        data = eval(request.data)
+        tasks = data[0].split(';')
+        task_num = int(tasks[0])
+        start_time = parse(tasks[1])
+        end_time = parse(tasks[2])
+        for x in range(1,task_num+1):
+            task = data[x].split(';')
+            task_start = parse(task[1])
+            task_end = parse(task[2])
+            if task_start < start_time:
+                if task_end > start_time & task_end < end_time:
+                    start_time = task_end
+                elif task_end > end_time:
+                    return 0
+            elif (task_start > start_time) & (task_start < end_time):
+                if task_end < end_time:
+                    gap1 = task_start - start_time
+                    gap2 = end_time - task_end
+                    if gap1 > gap2:
+                        end_time = task_start
+                    else:
+                        start_time = task_end
+                elif task_end > end_time:
+                    end_time = task_start
+        res = Response(str((end_time - start_time).seconds))
+        res.headers['Content-Type'] = 'text/plain'
+        return res
 
 @app.route('/stringcompression/<mode>', methods = ['POST'])
 def compress(mode):
