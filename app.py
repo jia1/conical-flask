@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dateutil.parser import parse
 from flask import Flask, jsonify, request, Response
 app = Flask(__name__)
@@ -143,3 +144,77 @@ def compress(mode):
     res.headers['Content-Type'] = 'text/plain'
     return res
 
+@app.route('/trainPlanner', methods = ['POST'])
+def plan():
+    if request.headers['Content-Type'] == 'application/json':
+        class Node:
+            name = ''
+            line = ''
+            passengers = 0
+            connections = []
+            pointer = None
+
+            def __init__(self, name = '', line = '', passengers = 0, connections = [], pointer = None):
+                self.name = name
+                self.line = line
+                self.passengers = passengers
+                self.connections = connections
+                self.pointer = pointer
+
+            def get_name(self): return self.name
+
+            def get_line(self): return self.line
+            def set_line(self, line): self.line = line
+
+            def get_passengers(self): return self.passengers
+            def add_passengers(self, passengers): self.passengers += passengers
+
+            def get_connections(self): return self.connections
+            def add_connections(self, connections): self.connections.extend(connections)
+
+            def get_pointer(self): return self.pointer
+            def set_pointer(self, node): self.pointer = node
+
+        data = request.json
+        dest = data['destination']
+        stns = data['stations']
+
+        nodes = {}
+        for stn in stns:
+            stn_name = stn['name']
+            nodes[stn_name] = Node(name = stn_name, passengers = stn['passengers'], connections = stn['connections'])
+        nodes[dest].set_pointer(nodes[dest])
+
+        to_explore = [dest]
+        explored = set()
+        while to_explore:
+            # Should use queue
+            src = to_explore.pop(0)
+            if src not in explored:
+                for neighbour in nodes[src].get_connections():
+                    neighbour_name = neighbour['station']
+                    nodes[neighbour_name].set_line(neighbour['line'])
+                    if nodes[neighbour_name].get_pointer() == None:
+                        nodes[neighbour_name].set_pointer(nodes[src])
+                        to_explore.append(neighbour_name)
+                explored.add(src)
+
+        curr_max = 0
+        curr_max_via = ''
+        list_max = {}
+        for stn_name in nodes:
+            curr_count = 0
+            prev_stn = None
+            curr_stn = nodes[stn_name]
+            while curr_stn.get_name() != dest:
+                curr_count += curr_stn.get_passengers()
+                prev_stn = curr_stn
+                curr_stn = curr_stn.get_pointer()
+            if prev_stn in list_max:
+                curr_count += list_max[prev_stn]
+                list_max[prev_stn] = curr_count
+            if curr_count > curr_max:
+                curr_max = curr_count
+                curr_max_via = prev_stn.get_name()
+
+        return jsonify({"line":prev_stn.get_line(),"totalNumOfPassengers":curr_max,"reachingVia":curr_max_via})
