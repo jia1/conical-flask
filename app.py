@@ -32,34 +32,23 @@ def heist():
         data = request.json
         maxWeight = data['maxWeight']
         vault = data['vault']
-        listWeights, listValues = [], []
-        for item in vault:
-            listWeights.append(item['weight'])
-            listValues.append(item['value'])
-        #return jsonify({'m': maxWeight, 'w': listWeights, 'v': listValues})
-        count = 0
-        listRatios = []
-        for i in listWeights:
-            listRatios.append(listValues[count]/i)
-            count  = count + 1
-            sortedIndices = [i[0] for i in sorted(enumerate(listRatios), key=lambda x:x[1])]
-            listRatios.sort()
-            listWeights = [ listWeights[i] for i in sortedIndices]
-            weight = 0
-            totalWeight = 0
-            count2= len(listRatios)-1
-            dollarValue = 0
-            while totalWeight <= maxWeight:
-                reqRatio = listRatios[count2]
-                weight = listWeights[count2]
-                prevTotal = totalWeight
-                totalWeight = totalWeight + weight
-                if maxWeight < totalWeight:
-                    dollarValue = dollarValue + (maxWeight - prevTotal)*reqRatio
-                    break
-                dollarValue = dollarValue + weight*reqRatio
-                count2 = count2 - 1
-                return jsonify({"heist": dollarValue})
+        dictionary = {} #value: weight
+        total_value = 0
+        for x in vault:
+            weight = int(x['weight'])
+            value = int(x['value'])
+            ratio = value / weight
+            dictionary[ratio] = weight
+        sorted_key = sorted(list(dictionary.keys()), reverse=True)
+        for r in sorted_key:
+            w = dictionary[r]
+            if w >= maxWeight:
+                total_value = total_value + int(r * maxWeight)
+                return jsonify({"heist": total_value})
+            else:
+                total_value = total_value + int(r * w)
+                maxWeight = maxWeight - w
+        return jsonify({"heist": total_value})
 
 @app.route('/releaseSchedule', methods = ['POST'])
 def release():
