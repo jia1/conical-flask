@@ -110,32 +110,36 @@ def compress(mode):
                 p_concat = p + c
                 if (p_concat in lzw_dict):
                     p = p_concat
-                elif (len(p_concat) == 1 and 0 <= ord(p_concat) <= 255):
+                elif len(p_concat) == 1 and 0 <= ord(p_concat) <= 255:
                     lzw_dict[p_concat] = ord(p_concat)
+                    p = p_concat
                 else:
                     lzw_dict[p_concat] = next_code
                     next_code += 1
                     p = c
-            return str(lzw_dict)
             answer = len(lzw_dict) * 12
         elif mode == 'WDE':
             data = data.strip()
             num_spaces = 0
             num_non_alphanum = 0
             prev = ''
-            lzw_dict = {}
-            next_code = 256
             p = data[0]
+            lzw_dict = {p: ord(p)}
+            next_code = 256
             for i in range(1, len(data)):
                 c = data[i]
                 if c == ' ':
+                    num_non_alphanum += 1
                     if prev != ' ':
                         num_spaces += 1
                 elif not c.isalnum():
                     num_non_alphanum += 1
                 else:
                     p_concat = p + c
-                    if (len(p_concat) == 1 and 0 <= ord(p_concat) <= 255) or p_concat in lzw_dict:
+                    if p_concat in lzw_dict:
+                        p = p_concat
+                    if len(p_concat) == 1 and 0 <= ord(p_concat) <= 255:
+                        lzw_dict[p_concat] = ord(p_concat)
                         p = p_concat
                     else:
                         lzw_dict[p_concat] = next_code
@@ -144,7 +148,8 @@ def compress(mode):
             if len(data) == 0:
                 answer = 0
             else:
-                answer = (num_spaces + 1) * 12 + num_non_alphanum * 12 + len(lzw_dict)
+                answer = (1 + num_spaces + num_non_alphanum) * 12 + len(lzw_dict)
+                #answer = [num_spaces, num_non_alphanum, lzw_dict]
         else:
             pass
     res = Response(str(answer))
