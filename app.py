@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 app = Flask(__name__)
 
 @app.route('/')
@@ -50,7 +50,7 @@ def heist():
 
 @app.route('/stringcompression/<mode>', methods = ['POST'])
 def compress(mode):
-    answer = 0
+    answer = 'NAK'
     if request.headers['Content-Type'] == 'application/json':
         data = request.json['data']
         if mode == 'RLE':
@@ -59,15 +59,16 @@ def compress(mode):
             counter = {}
             for c in data:
                 if c != sequence[-1]:
+                    sequence.append(c)
                     counter[c] = 1
                 else:
-                    sequence.append(c)
                     counter[c] += 1
-            for c in sequence:
-                compressed.append(counter[c])
+            for c in sequence[1:]:
+                if counter[c] > 1:
+                    compressed.append(str(counter[c]))
                 compressed.append(c)
             compressed = ''.join(compressed)
-            answer = len(answer) * 8
+            answer = len(compressed) * 8
         elif mode == 'LZW':
             codes = []
             lzw_dict = {}
@@ -112,7 +113,7 @@ def compress(mode):
                 answer = (num_spaces + 1) * 12 + num_non_alphanum * 12 + len(lzw_dict)
         else:
             pass
-    res = flask.Response(str(answer))
+    res = Response(str(answer))
     res.headers['Content-Type'] = 'text/plain'
     return res
 
